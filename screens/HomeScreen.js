@@ -20,7 +20,7 @@ export default function HomeScreen({ navigation }) {
     dispatch(
       SetOrigin({
         name: data.structured_formatting.main_text,
-        address: data.secondary_text,
+        address: data.structured_formatting.secondary_text,
         coordinate: {
           latitude: details.geometry.location.lat,
           longitude: details.geometry.location.lng,
@@ -32,7 +32,7 @@ export default function HomeScreen({ navigation }) {
     dispatch(
       SetDestination({
         name: data.structured_formatting.main_text,
-        address: data.secondary_text,
+        address: data.structured_formatting.secondary_text,
         coordinate: {
           latitude: details.geometry.location.lat,
           longitude: details.geometry.location.lng,

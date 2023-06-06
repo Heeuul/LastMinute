@@ -1,6 +1,7 @@
 import MapViewDirections from "react-native-maps-directions";
 import MapView, { Marker } from "react-native-maps";
 import React, { useEffect, useRef } from "react";
+import { Fontisto } from "@expo/vector-icons";
 
 import { GOOGLE_MAPS_APIKEY } from "@env";
 import { useSelector } from "react-redux";
@@ -29,7 +30,7 @@ export default function Map() {
     // Update delay workaround
     setTimeout(() => {
       mapRef.current.fitToElements(true);
-    }, 0.5);
+    }, 1);
   }, [origin, destination]);
 
   return (
@@ -52,7 +53,7 @@ export default function Map() {
           origin={origin.coordinate}
           destination={destination.coordinate}
           strokeWidth={3}
-          strokeColor="black"
+          strokeColor="charcoal"
           region="MY"
           onReady={(result) =>
             console.log(
@@ -71,7 +72,9 @@ export default function Map() {
           coordinate={origin.coordinate}
           identifier="origin"
           pinColor="grey"
-        />
+        >
+          <Fontisto name="map-marker-alt" size={32} color="black" />
+        </Marker>
       )}
 
       {destination?.coordinate && (
@@ -80,7 +83,9 @@ export default function Map() {
           description={destination.address}
           coordinate={destination.coordinate}
           identifier="destination"
-        />
+        >
+          <Fontisto name="flag" size={32} color={"red"} />
+        </Marker>
       )}
     </MapView>
   );
