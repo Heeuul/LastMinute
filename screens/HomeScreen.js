@@ -1,7 +1,7 @@
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 import GMapTextInput from "../components/GMapTextInput";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,33 +18,37 @@ export default function HomeScreen({ navigation }) {
   const destinations = useSelector(SelectDestinations);
   const dispatch = useDispatch();
 
-  const [destinationCount, SetDestinationCount] = useState(1);
   const [destinationInput, SetDestinationInput] = useState([]);
 
-  useEffect(() => {
-    const input = [];
+  useLayoutEffect(() => {
+    if (destinations.length === 0) dispatch(AddDestination({ id: 1 }));
+  }, []);
 
-    for (let i = 0; i < destinationCount; i++) {
-      input.push(
+  useEffect(() => {
+    let input = [];
+
+    for (let i = 1; i <= destinations.length; i++) {
+      input = [
+        ...input,
         <View className="w-3/4 m-5" key={i}>
-          <Text className="text-right mb-2">To where?</Text>
+          <Text className="text-right mb-2">{i > 1 ? "or" : "To"} where?</Text>
           <GMapTextInput
             placeholderText={"Enter your destination"}
             OnPressCall={(data, details) => OnSetDestination(i, data, details)}
             styles={{ container: { flex: 0 } }}
           />
-        </View>
-      );
+        </View>,
+      ];
     }
 
     SetDestinationInput(input);
-  }, [destinationCount]);
+  }, [destinations]);
+
   function AddInput() {
-    SetDestinationCount(destinationCount + 1);
+    dispatch(AddDestination({ id: destinations.length + 1 }));
   }
   function RemoveInput() {
-    SetDestinationCount(destinationCount - 1);
-    dispatch(RemoveDestination({ id: destinationCount }));
+    dispatch(RemoveDestination({ id: destinations.length }));
   }
 
   function OnSetOrigin(data, details = null) {
@@ -79,7 +83,27 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView className="h-full justify-center items-center">
-      <Text className={"w-3/4 font-bold text-3xl pb-5"}>Last Minute</Text>
+      {/* Title */}
+      <View className="w-3/4 pb-5 flex-row items-end justify-between">
+        <Text className={"font-bold text-3xl"}>Last Minute</Text>
+        <TouchableOpacity>
+          <Ionicons
+            name="warning"
+            size={35}
+            color="black"
+            style={{
+              position: "absolute",
+              left: 30,
+              top: -10,
+            }}
+          />
+          <MaterialCommunityIcons
+            name="clock-time-eleven-outline"
+            size={50}
+            color="black"
+          />
+        </TouchableOpacity>
+      </View>
 
       {/* Origin */}
       <View className="w-3/4 m-5">
@@ -97,22 +121,22 @@ export default function HomeScreen({ navigation }) {
         <View className="flex-row">
           <TouchableOpacity
             onPress={AddInput}
-            disabled={destinationCount === 4}
+            disabled={destinations.length === 4}
           >
             <Ionicons
               name="add-circle"
               size={44}
-              color={destinationCount === 4 ? "#d1d5db" : "black"}
+              color={destinations.length === 4 ? "#d1d5db" : "black"}
             />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={RemoveInput}
-            disabled={destinationCount === 1}
+            disabled={destinations.length === 1}
           >
             <Ionicons
               name="remove-circle"
               size={44}
-              color={destinationCount === 1 ? "#d1d5db" : "black"}
+              color={destinations.length === 1 ? "#d1d5db" : "black"}
             />
           </TouchableOpacity>
         </View>
