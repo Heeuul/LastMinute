@@ -13,6 +13,7 @@ export default function GMapTextInput({
       placeholder={placeholderText}
       nearbyPlacesAPI="GooglePlacesSearch"
       query={{ key: GOOGLE_MAPS_APIKEY, language: "en" }}
+      components="country:my"
       debounce={400}
       minLength={2}
       onPress={OnPressCall}

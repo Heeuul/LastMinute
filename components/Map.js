@@ -1,37 +1,17 @@
 import MapViewDirections from "react-native-maps-directions";
 import MapView, { Marker } from "react-native-maps";
-import React, { useEffect, useRef } from "react";
 import { Fontisto } from "@expo/vector-icons";
+import React, { useRef } from "react";
+import { View } from "react-native";
 
 import { GOOGLE_MAPS_APIKEY } from "@env";
 import { useSelector } from "react-redux";
-import { SelectDestination, SelectOrigin } from "../slices/mapSlice";
+import { SelectDestinations, SelectOrigin } from "../slices/mapSlice";
 
 export default function Map() {
   const origin = useSelector(SelectOrigin);
-  const destination = useSelector(SelectDestination);
+  const destinations = useSelector(SelectDestinations);
   const mapRef = useRef(null);
-
-  console.log(
-    "Origin:" +
-      JSON.stringify(origin, null, 2) +
-      "\nDestination:" +
-      JSON.stringify(destination, null, 2)
-  );
-
-  useEffect(() => {
-    if (!origin || !destination) return;
-
-    // Zoom to fit markers
-    mapRef.current.fitToSuppliedMarkers(["origin", "destination"], {
-      edgePadding: { top: 75, bottom: 75, right: 50, left: 50 },
-    });
-
-    // Update delay workaround
-    setTimeout(() => {
-      mapRef.current.fitToElements(true);
-    }, 1);
-  }, [origin, destination]);
 
   return (
     <MapView
@@ -47,23 +27,43 @@ export default function Map() {
         longitudeDelta: 0.005,
       }}
     >
-      {origin && destination && (
-        <MapViewDirections
-          apikey={GOOGLE_MAPS_APIKEY}
-          origin={origin.coordinate}
-          destination={destination.coordinate}
-          strokeWidth={3}
-          strokeColor="charcoal"
-          region="MY"
-          onReady={(result) =>
-            console.log(
-              "Travel Duration: " +
-                JSON.stringify(result.duration, null, 2) +
-                " mins"
-            )
-          }
-        />
-      )}
+      {origin &&
+        Array.isArray(destinations) &&
+        destinations.length &&
+        destinations.map((dest, i) => (
+          <MapViewDirections
+            key={i}
+            apikey={GOOGLE_MAPS_APIKEY}
+            origin={origin.coordinate}
+            destination={dest.coordinate}
+            strokeWidth={3}
+            strokeColor={{ 0: "red", 1: "cyan", 2: "green", 3: "magenta" }[i]}
+            region="MY"
+            onReady={(result) => {
+              console.log(
+                "Travel Duration to " +
+                  dest.name +
+                  ": " +
+                  JSON.stringify(result.duration, null, 2) +
+                  " mins"
+              );
+
+              // Zoom to show all markers
+              mapRef.current.fitToSuppliedMarkers(
+                [
+                  "origin",
+                  "destination 0",
+                  "destination 1",
+                  "destination 2",
+                  "destination 3",
+                ],
+                {
+                  edgePadding: { top: 75, bottom: 75, right: 50, left: 50 },
+                }
+              );
+            }}
+          />
+        ))}
 
       {origin?.coordinate && (
         <Marker
@@ -71,22 +71,32 @@ export default function Map() {
           description={origin.address}
           coordinate={origin.coordinate}
           identifier="origin"
-          pinColor="grey"
         >
           <Fontisto name="map-marker-alt" size={32} color="black" />
         </Marker>
       )}
 
-      {destination?.coordinate && (
-        <Marker
-          title={destination.name}
-          description={destination.address}
-          coordinate={destination.coordinate}
-          identifier="destination"
-        >
-          <Fontisto name="flag" size={32} color={"red"} />
-        </Marker>
-      )}
+      {Array.isArray(destinations) &&
+        destinations.length &&
+        destinations.map((dest, i) => (
+          <Marker
+            key={i}
+            title={dest.name}
+            description={dest.address}
+            coordinate={dest.coordinate}
+            identifier={"destination " + i}
+          >
+            <View className="items-center justify-center">
+              <Fontisto name="map-marker" size={35} color={"black"} />
+              <Fontisto
+                name="map-marker-alt"
+                size={25}
+                color={{ 0: "red", 1: "cyan", 2: "green", 3: "magenta" }[i]}
+                style={{ position: "absolute" }}
+              />
+            </View>
+          </Marker>
+        ))}
     </MapView>
   );
 }
