@@ -1,9 +1,9 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
-import GMapTextInput from "../components/GMapTextInput";
+import { GMapTextInput } from "../components/GMapTextInput";
 import { useDispatch, useSelector } from "react-redux";
 import {
   SetOrigin,
@@ -14,6 +14,9 @@ import {
   SelectDestinations,
 } from "../slices/mapSlice";
 
+const MINDESTINATIONS = 2;
+const MAXDESTINATIONS = 4;
+
 export default function HomeScreen({ navigation }) {
   const origin = useSelector(SelectOrigin);
   const destinations = useSelector(SelectDestinations);
@@ -22,42 +25,50 @@ export default function HomeScreen({ navigation }) {
   const [destinationInput, SetDestinationInput] = useState([]);
 
   useLayoutEffect(() => {
-    if (destinations.length === 0) AddInput();
-  }, []);
+    if (MINDESTINATIONS > MAXDESTINATIONS) {
+      console.error(
+        "MINDESTINATIONS[line 17] cannot be higher than MAXDESTINATIONS[line 18]!"
+      );
+      return;
+    }
 
-  useEffect(() => {
-    UpdateInputs();
-  }, [destinations]);
+    if (destinationInput.length < MINDESTINATIONS) AddInput();
+  }, [destinationInput]);
+
+  function ClearAllInputs() {
+    console.log("InputRefCount:" + inputRefs.current.length);
+    inputRefs.current.map((inputRef) => inputRef.current.ClearInput());
+  }
 
   function AddInput() {
-    dispatch(AddDestination({ id: destinations.length }));
+    dispatch(AddDestination({ id: destinationInput.length }));
+
+    let addInput = [...destinationInput];
+    addInput = [
+      ...addInput,
+      <View className="w-3/4 m-5" key={destinationInput.length}>
+        <Text className="text-right mb-2">
+          {destinationInput.length > 1 ? "or" : "To"} where?
+        </Text>
+        <GMapTextInput
+          placeholderText={"Enter your destination"}
+          OnPressCall={(data, details) =>
+            OnUpdateDestination(destinationInput.length, data, details)
+          }
+          styles={{ container: { flex: 0 } }}
+        />
+      </View>,
+    ];
+    SetDestinationInput(addInput);
+
+    return destinationInput.length;
   }
   function RemoveInput() {
     dispatch(RemoveDestination({ id: destinations.length - 1 }));
-  }
-  function UpdateInputs() {
-    if (destinations.length === destinationInput.length) return;
 
-    let input = [...destinationInput];
-    if (destinations.length > destinationInput.length)
-      input = [
-        ...input,
-        <View className="w-3/4 m-5" key={destinationInput.length}>
-          <Text className="text-right mb-2">
-            {destinationInput.length > 1 ? "or" : "To"} where?
-          </Text>
-          <GMapTextInput
-            placeholderText={"Enter your destination"}
-            OnPressCall={(data, details) =>
-              OnSetDestination(destinationInput.length, data, details)
-            }
-            styles={{ container: { flex: 0 } }}
-          />
-        </View>,
-      ];
-    else if (destinations.length < destinationInput.length) input.pop();
-
-    SetDestinationInput(input);
+    let cutInput = [...destinationInput];
+    cutInput.pop();
+    SetDestinationInput(cutInput);
   }
   function OnSetOrigin(data, details = null) {
     dispatch(
@@ -71,7 +82,7 @@ export default function HomeScreen({ navigation }) {
       })
     );
   }
-  function OnSetDestination(id, data, details = null) {
+  function OnUpdateDestination(id, data, details = null) {
     dispatch(
       UpdateDestination({
         id: id,
@@ -93,7 +104,7 @@ export default function HomeScreen({ navigation }) {
       {/* Title */}
       <View className="w-3/4 pb-5 flex-row items-end justify-between">
         <Text className={"font-bold text-3xl"}>Last Minute</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={ClearAllInputs}>
           <Ionicons
             name="warning"
             size={35}
@@ -128,22 +139,26 @@ export default function HomeScreen({ navigation }) {
         <View className="flex-row">
           <TouchableOpacity
             onPress={AddInput}
-            disabled={destinations.length === 4}
+            disabled={destinations.length === MAXDESTINATIONS}
           >
             <Ionicons
               name="add-circle"
               size={44}
-              color={destinations.length === 4 ? "#d1d5db" : "black"}
+              color={
+                destinations.length === MAXDESTINATIONS ? "#d1d5db" : "black"
+              }
             />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={RemoveInput}
-            disabled={destinations.length === 1}
+            disabled={destinations.length === MINDESTINATIONS}
           >
             <Ionicons
               name="remove-circle"
               size={44}
-              color={destinations.length === 1 ? "#d1d5db" : "black"}
+              color={
+                destinations.length === MINDESTINATIONS ? "#d1d5db" : "black"
+              }
             />
           </TouchableOpacity>
         </View>
