@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -78,12 +78,15 @@ export default function HomeScreen({ navigation }) {
       SetOrigin({
         name: data.structured_formatting.main_text,
         address: data.structured_formatting.secondary_text,
+        description: data.description,
         coordinate: {
           latitude: details.geometry.location.lat,
           longitude: details.geometry.location.lng,
         },
       })
     );
+
+    console.log(JSON.stringify(data, null, 2));
   }
   function OnUpdateDestination(id, data = null, details = null) {
     dispatch(
@@ -91,6 +94,7 @@ export default function HomeScreen({ navigation }) {
         id: id,
         name: data ? data.structured_formatting.main_text : null,
         address: data ? data.structured_formatting.secondary_text : null,
+        description: data ? data.description : null,
         coordinate: details
           ? {
               latitude: details?.geometry.location.lat,

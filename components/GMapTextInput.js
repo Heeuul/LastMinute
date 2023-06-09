@@ -2,16 +2,24 @@ import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplet
 import React, { forwardRef, useImperativeHandle, useRef } from "react";
 
 import { GOOGLE_MAPS_APIKEY } from "@env";
+import { useEffect } from "react";
 
 export { GMapTextInput };
 const GMapTextInput = forwardRef(
-  ({ placeholderText, OnPressCall, styles }, ref) => {
+  ({ placeholderText, OnPressCall, styles, initialAddress }, ref) => {
     useImperativeHandle(ref, () => ({
       ClearInput() {
         inputRef.current.clear();
         inputRef.current.setAddressText("");
       },
     }));
+
+    useEffect(() => {
+      if (initialAddress) {
+        console.log("Received initial address:" + initialAddress);
+        inputRef.current.setAddressText(initialAddress);
+      }
+    }, []);
 
     const inputRef = useRef();
     return (
