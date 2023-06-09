@@ -22,7 +22,8 @@ export default function HomeScreen({ navigation }) {
   const destinations = useSelector(SelectDestinations);
   const dispatch = useDispatch();
 
-  const [destinationInput, SetDestinationInput] = useState([]);
+  const [destinationInputs, SetDestinationInputs] = useState([]);
+  const inputRefs = useRef([]);
 
   useLayoutEffect(() => {
     if (MINDESTINATIONS > MAXDESTINATIONS) {
@@ -32,45 +33,47 @@ export default function HomeScreen({ navigation }) {
       return;
     }
 
-    if (destinationInput.length < MINDESTINATIONS) AddInput();
-  }, [destinationInput]);
+    inputRefs.current = inputRefs.current.slice(0, destinationInputs.length);
+    if (destinationInputs.length < MINDESTINATIONS) AddInput();
+  }, [destinationInputs]);
 
-  function ClearAllInputs() {
-    console.log("InputRefCount:" + inputRefs.current.length);
-    inputRefs.current.map((inputRef) => inputRef.current.ClearInput());
+  function ClearDestinations() {
+    inputRefs.current.map((inputRef) => inputRef.ClearInput());
+    destinations.map((destination, i) => OnUpdateDestination(i));
   }
 
   function AddInput() {
-    dispatch(AddDestination({ id: destinationInput.length }));
+    dispatch(AddDestination({ id: destinationInputs.length }));
 
-    let addInput = [...destinationInput];
+    let addInput = [...destinationInputs];
     addInput = [
       ...addInput,
-      <View className="w-3/4 m-5" key={destinationInput.length}>
+      <View className="w-3/4 m-5" key={destinationInputs.length}>
         <Text className="text-right mb-2">
-          {destinationInput.length > 1 ? "or" : "To"} where?
+          {destinationInputs.length > 1 ? "or" : "To"} where?
         </Text>
         <GMapTextInput
+          ref={(el) => (inputRefs.current[destinationInputs.length] = el)}
           placeholderText={"Enter your destination"}
           OnPressCall={(data, details) =>
-            OnUpdateDestination(destinationInput.length, data, details)
+            OnUpdateDestination(destinationInputs.length, data, details)
           }
           styles={{ container: { flex: 0 } }}
         />
       </View>,
     ];
-    SetDestinationInput(addInput);
+    SetDestinationInputs(addInput);
 
-    return destinationInput.length;
+    return destinationInputs.length;
   }
   function RemoveInput() {
     dispatch(RemoveDestination({ id: destinations.length - 1 }));
 
-    let cutInput = [...destinationInput];
+    let cutInput = [...destinationInputs];
     cutInput.pop();
-    SetDestinationInput(cutInput);
+    SetDestinationInputs(cutInput);
   }
-  function OnSetOrigin(data, details = null) {
+  function OnSetOrigin(data, details) {
     dispatch(
       SetOrigin({
         name: data.structured_formatting.main_text,
@@ -82,16 +85,18 @@ export default function HomeScreen({ navigation }) {
       })
     );
   }
-  function OnUpdateDestination(id, data, details = null) {
+  function OnUpdateDestination(id, data = null, details = null) {
     dispatch(
       UpdateDestination({
         id: id,
-        name: data.structured_formatting.main_text,
-        address: data.structured_formatting.secondary_text,
-        coordinate: {
-          latitude: details.geometry.location.lat,
-          longitude: details.geometry.location.lng,
-        },
+        name: data ? data.structured_formatting.main_text : null,
+        address: data ? data.structured_formatting.secondary_text : null,
+        coordinate: details
+          ? {
+              latitude: details?.geometry.location.lat,
+              longitude: details?.geometry.location.lng,
+            }
+          : null,
       })
     );
   }
@@ -104,7 +109,7 @@ export default function HomeScreen({ navigation }) {
       {/* Title */}
       <View className="w-3/4 pb-5 flex-row items-end justify-between">
         <Text className={"font-bold text-3xl"}>Last Minute</Text>
-        <TouchableOpacity onPress={ClearAllInputs}>
+        <TouchableOpacity onPress={ClearDestinations}>
           <Ionicons
             name="warning"
             size={35}
@@ -133,31 +138,35 @@ export default function HomeScreen({ navigation }) {
         />
       </View>
       {/* Destination(s) */}
-      {destinationInput}
+      {destinationInputs}
 
       <View className="flex-row w-3/4 items-center justify-between">
         <View className="flex-row">
           <TouchableOpacity
             onPress={AddInput}
-            disabled={destinations.length === MAXDESTINATIONS}
+            disabled={destinationInputs.length === MAXDESTINATIONS}
           >
             <Ionicons
               name="add-circle"
               size={44}
               color={
-                destinations.length === MAXDESTINATIONS ? "#d1d5db" : "black"
+                destinationInputs.length === MAXDESTINATIONS
+                  ? "#d1d5db"
+                  : "black"
               }
             />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={RemoveInput}
-            disabled={destinations.length === MINDESTINATIONS}
+            disabled={destinationInputs.length === MINDESTINATIONS}
           >
             <Ionicons
               name="remove-circle"
               size={44}
               color={
-                destinations.length === MINDESTINATIONS ? "#d1d5db" : "black"
+                destinationInputs.length === MINDESTINATIONS
+                  ? "#d1d5db"
+                  : "black"
               }
             />
           </TouchableOpacity>
@@ -165,14 +174,9 @@ export default function HomeScreen({ navigation }) {
         {/* Check Button */}
         <TouchableOpacity
           className={
-            "rounded-full px-10 py-3 " +
-            (!origin || !Array.isArray(destinations) || !destinations.length
-              ? "bg-gray-300"
-              : "bg-black")
+            "rounded-full px-10 py-3 " + (!origin ? "bg-gray-300" : "bg-black")
           }
-          disabled={
-            !origin || !Array.isArray(destinations) || !destinations.length
-          }
+          disabled={!origin}
           onPress={OnCheck}
         >
           <Text className="font-semibold text-xl text-white">Check!</Text>

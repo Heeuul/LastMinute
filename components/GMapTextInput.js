@@ -8,7 +8,6 @@ const GMapTextInput = forwardRef(
   ({ placeholderText, OnPressCall, styles }, ref) => {
     useImperativeHandle(ref, () => ({
       ClearInput() {
-        console.log("a");
         inputRef.current.clear();
         inputRef.current.setAddressText("");
       },
