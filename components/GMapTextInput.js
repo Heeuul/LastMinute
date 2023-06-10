@@ -33,6 +33,7 @@ const GMapTextInput = forwardRef(
         minLength={2}
         onPress={OnPressCall}
         returnKeyType={"search"}
+        keepResultsAfterBlur={true}
         enablePoweredByContainer={false}
         // currentLocation={true}
         fetchDetails={true}

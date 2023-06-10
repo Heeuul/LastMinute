@@ -6,16 +6,14 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { GMapTextInput } from "../components/GMapTextInput";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  SetOrigin,
-  SelectOrigin,
   AddDestination,
-  UpdateDestination,
   RemoveDestination,
   SelectDestinations,
+  SelectOrigin,
+  SetOrigin,
+  UpdateDestination,
 } from "../slices/mapSlice";
-
-const MINDESTINATIONS = 2;
-const MAXDESTINATIONS = 4;
+import { Settings } from "../settings";
 
 export default function HomeScreen({ navigation }) {
   const origin = useSelector(SelectOrigin);
@@ -26,7 +24,7 @@ export default function HomeScreen({ navigation }) {
   const inputRefs = useRef([]);
 
   useLayoutEffect(() => {
-    if (MINDESTINATIONS > MAXDESTINATIONS) {
+    if (Settings.destinations.min > Settings.destinations.max) {
       console.error(
         "MINDESTINATIONS[line 17] cannot be higher than MAXDESTINATIONS[line 18]!"
       );
@@ -34,7 +32,7 @@ export default function HomeScreen({ navigation }) {
     }
 
     inputRefs.current = inputRefs.current.slice(0, destinationInputs.length);
-    if (destinationInputs.length < MINDESTINATIONS) AddInput();
+    if (destinations.length < Settings.destinations.min) AddInput();
   }, [destinationInputs]);
 
   function ClearDestinations() {
@@ -63,16 +61,15 @@ export default function HomeScreen({ navigation }) {
       </View>,
     ];
     SetDestinationInputs(addInput);
-
-    return destinationInputs.length;
   }
   function RemoveInput() {
-    dispatch(RemoveDestination({ id: destinations.length - 1 }));
+    dispatch(RemoveDestination({ id: destinationInputs.length - 1 }));
 
     let cutInput = [...destinationInputs];
     cutInput.pop();
     SetDestinationInputs(cutInput);
   }
+
   function OnSetOrigin(data, details) {
     dispatch(
       SetOrigin({
@@ -85,8 +82,6 @@ export default function HomeScreen({ navigation }) {
         },
       })
     );
-
-    console.log(JSON.stringify(data, null, 2));
   }
   function OnUpdateDestination(id, data = null, details = null) {
     dispatch(
@@ -148,13 +143,13 @@ export default function HomeScreen({ navigation }) {
         <View className="flex-row">
           <TouchableOpacity
             onPress={AddInput}
-            disabled={destinationInputs.length === MAXDESTINATIONS}
+            disabled={destinationInputs.length === Settings.destinations.max}
           >
             <Ionicons
               name="add-circle"
               size={44}
               color={
-                destinationInputs.length === MAXDESTINATIONS
+                destinationInputs.length === Settings.destinations.max
                   ? "#d1d5db"
                   : "black"
               }
@@ -162,13 +157,13 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={RemoveInput}
-            disabled={destinationInputs.length === MINDESTINATIONS}
+            disabled={destinationInputs.length === Settings.destinations.min}
           >
             <Ionicons
               name="remove-circle"
               size={44}
               color={
-                destinationInputs.length === MINDESTINATIONS
+                destinationInputs.length === Settings.destinations.min
                   ? "#d1d5db"
                   : "black"
               }
