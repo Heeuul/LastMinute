@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useCallback } from "react";
+import React, { useRef, useMemo, useCallback, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { Fontisto, Ionicons } from "@expo/vector-icons";
@@ -106,6 +106,12 @@ export default function Inputs() {
     );
   }
 
+  const [inputRefs, SetInputRefs] = useState([]);
+  function ClearDestinations() {
+    inputRefs.current.map((inputRef) => inputRef.ClearInput());
+    destinations.map((destination, i) => OnUpdateDestination(i));
+  }
+
   return (
     <BottomSheet
       ref={bottomSheetRef}
@@ -149,7 +155,7 @@ export default function Inputs() {
       />
 
       {/* Buttons */}
-      <View className="flex-row w-3/4 items-end justify-between pb-1 pl-2">
+      <View className="flex-row w-full items-end justify-between pb-1 pl-2">
         <View className="flex-row">
           <TouchableOpacity
             onPress={AddInput}
@@ -157,7 +163,7 @@ export default function Inputs() {
           >
             <Ionicons
               name="add-circle"
-              size={44}
+              size={45}
               color={
                 destinations.length === Settings.destinations.max
                   ? "#d1d5db"
@@ -171,7 +177,7 @@ export default function Inputs() {
           >
             <Ionicons
               name="remove-circle"
-              size={44}
+              size={45}
               color={
                 destinations.length === Settings.destinations.min
                   ? "#d1d5db"
@@ -180,6 +186,12 @@ export default function Inputs() {
             />
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity className="h-1/2 w-1/2 justify-center items-center">
+          <Text className="text-xl font-light text-black">
+            Clear Destinations
+          </Text>
+        </TouchableOpacity>
       </View>
     </BottomSheet>
   );
