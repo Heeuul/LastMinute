@@ -1,16 +1,26 @@
-import React, { useRef, useMemo, useCallback, useState } from "react";
+import React, {
+  useRef,
+  useMemo,
+  useCallback,
+  useState,
+  useLayoutEffect,
+} from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { Fontisto, Ionicons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
-  AddDestination,
-  RemoveDestination,
-  SelectDestinations,
-  SelectOrigin,
   SetOrigin,
+  AddDestination,
   UpdateDestination,
+  RemoveDestination,
+  AddTravelTime,
+  UpdateTravelTime,
+  RemoveTravelTime,
+  SelectOrigin,
+  SelectDestinations,
+  SelectTravelTimes,
 } from "../slices/mapSlice";
 import { GMapTextInput } from "./GMapTextInput";
 import { Settings } from "../settings";
@@ -18,6 +28,7 @@ import { Settings } from "../settings";
 export default function Inputs() {
   const origin = useSelector(SelectOrigin);
   const destinations = useSelector(SelectDestinations);
+  const travelTimes = useSelector(SelectTravelTimes);
   const dispatch = useDispatch();
 
   const singleSnapPercent = 8;
@@ -29,15 +40,24 @@ export default function Inputs() {
 
   function AddInput() {
     dispatch(AddDestination({ id: destinations.length }));
+    dispatch(AddTravelTime({ id: destinations.length }));
   }
   function RemoveInput() {
     dispatch(RemoveDestination({ id: destinations.length - 1 }));
+    dispatch(RemoveTravelTime({ id: destinations.length - 1 }));
   }
 
   function GetDestinationInputRender(item) {
     return (
       <>
-        <Text className="text-right text-gray-500">1 Hours and 30 minutes</Text>
+        <Text className="text-right text-gray-500">
+          {travelTimes[item.id]?.duration
+            ? (travelTimes[item.id].duration > 60
+                ? Math.floor(travelTimes[item.id].duration / 60) + " hours"
+                : "") +
+              ((travelTimes[item.id].duration % 60) + " minutes")
+            : ""}
+        </Text>
         <View className="flex-row">
           <View
             style={{ paddingRight: 10 }}
@@ -60,6 +80,7 @@ export default function Inputs() {
             />
           </View>
           <GMapTextInput
+            ref={(el) => (destinationInputRefs.current[item.id] = el)}
             placeholderText="Enter your destination"
             initialAddress={item.description}
             OnPressCall={(data, details) =>
@@ -105,17 +126,31 @@ export default function Inputs() {
       })
     );
   }
-
-  const [inputRefs, SetInputRefs] = useState([]);
-  function ClearDestinations() {
-    inputRefs.current.map((inputRef) => inputRef.ClearInput());
-    destinations.map((destination, i) => OnUpdateDestination(i));
+  function OnClearDestinationInputs() {
+    destinationInputRefs.current.map((inputRef) => inputRef.ClearInput());
+    destinations.map((destinations, i) => {
+      OnUpdateDestination(i);
+      dispatch(UpdateTravelTime({ id: i }));
+    });
   }
+
+  const [renderList, SetRenderList] = useState(false);
+  const destinationInputRefs = useRef([]);
+  useLayoutEffect(() => {
+    // Update refs for destination inputs
+    destinationInputRefs.current = destinationInputRefs.current.slice(
+      0,
+      destinations.length
+    );
+
+    // Rerender destination inputs Flatlist
+    SetRenderList(!renderList);
+  }, [destinations]);
 
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      index={1}
+      index={0}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
     >
@@ -152,10 +187,11 @@ export default function Inputs() {
           paddingRight: 15,
         }}
         renderItem={({ item }) => GetDestinationInputRender(item)}
+        extraData={renderList}
       />
 
       {/* Buttons */}
-      <View className="flex-row w-full items-end justify-between pb-1 pl-2">
+      <View className="flex-row w-full items-center justify-between pb-1 px-2">
         <View className="flex-row">
           <TouchableOpacity
             onPress={AddInput}
@@ -187,8 +223,11 @@ export default function Inputs() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity className="h-1/2 w-1/2 justify-center items-center">
-          <Text className="text-xl font-light text-black">
+        <TouchableOpacity
+          className="rounded-3xl border-gray-700 border-solid border"
+          onPress={OnClearDestinationInputs}
+        >
+          <Text className="text-base font-base text-gray-700 p-2">
             Clear Destinations
           </Text>
         </TouchableOpacity>

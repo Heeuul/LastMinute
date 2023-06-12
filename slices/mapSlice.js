@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   origin: null,
   destinations: [],
-  travelTime: null,
+  travelTimes: [],
 };
 
 export const mapSlice = createSlice({
@@ -37,8 +37,29 @@ export const mapSlice = createSlice({
 
       state.destinations = newDests;
     },
-    SetTravelTime: (state, action) => {
-      state.travelTime = action.payload;
+    AddTravelTime: (state, action) => {
+      state.travelTimes = [...state.travelTimes, action.payload];
+    },
+    UpdateTravelTime: (state, action) => {
+      if (action.payload.id > state.travelTimes.length)
+        console.warn(
+          `Cannot update travelTime for (id:${action.payload.id}) as it does not exist`
+        );
+      else state.travelTimes[action.payload.id] = action.payload;
+    },
+    RemoveTravelTime: (state, action) => {
+      const id = state.travelTimes.findIndex(
+        (duration) => duration.id === action.payload.id
+      );
+      let newDurations = [...state.travelTimes];
+
+      if (id >= 0) newDurations.splice(id, 1);
+      else
+        console.warn(
+          `Cannot remove destination (id:${action.payload.id}) as it is not in list`
+        );
+
+      state.travelTimes = newDurations;
     },
   },
 });
@@ -46,12 +67,14 @@ export const mapSlice = createSlice({
 // Selectors
 export const SelectOrigin = (state) => state.map.origin;
 export const SelectDestinations = (state) => state.map.destinations;
-export const SelectTravelTime = (state) => state.map.travelTime;
+export const SelectTravelTimes = (state) => state.map.travelTimes;
 export const {
   SetOrigin,
   AddDestination,
   UpdateDestination,
   RemoveDestination,
-  SetTravelTime,
+  AddTravelTime,
+  UpdateTravelTime,
+  RemoveTravelTime,
 } = mapSlice.actions;
 export default mapSlice.reducer;

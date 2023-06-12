@@ -5,14 +5,20 @@ import React, { useRef, useEffect } from "react";
 import { View, Dimensions } from "react-native";
 
 import { GOOGLE_MAPS_APIKEY } from "@env";
-import { useSelector } from "react-redux";
-import { SelectDestinations, SelectOrigin } from "../slices/mapSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  UpdateTravelTime,
+  SelectDestinations,
+  SelectOrigin,
+} from "../slices/mapSlice";
 import { Settings } from "../settings";
 
 export default function Map() {
   const origin = useSelector(SelectOrigin);
   const destinations = useSelector(SelectDestinations);
   const mapRef = useRef(null);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {}, [destinations]);
 
@@ -46,12 +52,11 @@ export default function Map() {
                   strokeColor={Settings.colors[i]}
                   region="MY"
                   onReady={(result) => {
-                    console.log(
-                      "Travel Duration to " +
-                        dest.name +
-                        ": " +
-                        JSON.stringify(result.duration, null, 2) +
-                        " mins"
+                    dispatch(
+                      UpdateTravelTime({
+                        id: i,
+                        duration: result.duration,
+                      })
                     );
 
                     // Zoom to show all markers
