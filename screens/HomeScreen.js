@@ -6,18 +6,22 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { GMapTextInput } from "../components/GMapTextInput";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  AddDestination,
-  RemoveDestination,
-  SelectDestinations,
-  SelectOrigin,
   SetOrigin,
+  AddDestination,
   UpdateDestination,
+  RemoveDestination,
+  AddTravelTime,
+  RemoveTravelTime,
+  SelectOrigin,
+  SelectDestinations,
+  SelectTravelTimes,
 } from "../slices/mapSlice";
 import { Settings } from "../settings";
 
 export default function HomeScreen({ navigation }) {
   const origin = useSelector(SelectOrigin);
   const destinations = useSelector(SelectDestinations);
+  const travelTimes = useSelector(SelectTravelTimes);
   const dispatch = useDispatch();
 
   const [destinationInputs, SetDestinationInputs] = useState([]);
@@ -42,6 +46,7 @@ export default function HomeScreen({ navigation }) {
 
   function AddInput() {
     dispatch(AddDestination({ id: destinationInputs.length }));
+    dispatch(AddTravelTime({ id: travelTimes.length }));
 
     let addInput = [...destinationInputs];
     addInput = [
@@ -64,6 +69,7 @@ export default function HomeScreen({ navigation }) {
   }
   function RemoveInput() {
     dispatch(RemoveDestination({ id: destinationInputs.length - 1 }));
+    dispatch(RemoveTravelTime({ id: travelTimes.length - 1 }));
 
     let cutInput = [...destinationInputs];
     cutInput.pop();

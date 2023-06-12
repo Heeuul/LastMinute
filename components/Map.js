@@ -88,6 +88,7 @@ export default function Map() {
             description={origin.address}
             coordinate={origin.coordinate}
             identifier="origin"
+            tracksViewChanges={false}
           >
             <Fontisto name="map-marker-alt" size={32} color="black" />
           </Marker>
@@ -104,6 +105,7 @@ export default function Map() {
                   description={dest.address}
                   coordinate={dest.coordinate}
                   identifier={"destination " + i}
+                  tracksViewChanges={false}
                 >
                   <View className="items-center justify-center">
                     <Fontisto name="map-marker" size={35} color={"black"} />

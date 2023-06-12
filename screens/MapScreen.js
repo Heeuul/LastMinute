@@ -10,9 +10,7 @@ import React from "react";
 import Inputs from "../components/Inputs";
 import Map from "../components/Map";
 
-//?DOING: Timer for each destinations.
-//TODO: Click on marker to show in middle of screen
-//TODO: Clear button outline
+//? Click on marker to show in middle of screen
 //TODO: Compare route button (recall fittosuppliedmarkers)
 
 export default function MapScreen() {

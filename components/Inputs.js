@@ -40,11 +40,11 @@ export default function Inputs() {
 
   function AddInput() {
     dispatch(AddDestination({ id: destinations.length }));
-    dispatch(AddTravelTime({ id: destinations.length }));
+    dispatch(AddTravelTime({ id: travelTimes.length }));
   }
   function RemoveInput() {
     dispatch(RemoveDestination({ id: destinations.length - 1 }));
-    dispatch(RemoveTravelTime({ id: destinations.length - 1 }));
+    dispatch(RemoveTravelTime({ id: travelTimes.length - 1 }));
   }
 
   function GetDestinationInputRender(item) {
@@ -53,9 +53,9 @@ export default function Inputs() {
         <Text className="text-right text-gray-500">
           {travelTimes[item.id]?.duration
             ? (travelTimes[item.id].duration > 60
-                ? Math.floor(travelTimes[item.id].duration / 60) + " hours"
-                : "") +
-              ((travelTimes[item.id].duration % 60) + " minutes")
+                ? Math.floor(travelTimes[item.id].duration / 60) + " hours "
+                : " ") +
+              (Math.round(travelTimes[item.id].duration % 60) + " minutes")
             : ""}
         </Text>
         <View className="flex-row">
@@ -155,12 +155,12 @@ export default function Inputs() {
       onChange={handleSheetChanges}
     >
       {/* Origin */}
-      <View className="flex-row items-center w-full mx-2 pr-3">
+      <View className="flex-row items-center w-full pr-1 border-b-gray-300 border-b-2">
         <Fontisto
           name="map-marker-alt"
           size={35}
           color={"black"}
-          style={{ paddingRight: 10 }}
+          style={{ paddingHorizontal: 10 }}
         />
         <GMapTextInput
           placeholderText="Enter your starting point"
@@ -173,9 +173,6 @@ export default function Inputs() {
           }}
         />
       </View>
-
-      {/* Separator */}
-      <View className="w-full self-center border-t-gray-200 border-t-2 pb-2" />
 
       {/* Destination Inputs */}
       <BottomSheetFlatList
@@ -191,7 +188,7 @@ export default function Inputs() {
       />
 
       {/* Buttons */}
-      <View className="flex-row w-full items-center justify-between pb-1 px-2">
+      <View className="flex-row w-full items-center justify-between pb-1 px-2 border-t-gray-300 border-t-2">
         <View className="flex-row">
           <TouchableOpacity
             onPress={AddInput}
