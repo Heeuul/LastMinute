@@ -16,7 +16,6 @@ const GMapTextInput = forwardRef(
 
     useEffect(() => {
       if (initialAddress) {
-        console.log("Received initial address:" + initialAddress);
         inputRef.current.setAddressText(initialAddress);
       }
     }, []);

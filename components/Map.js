@@ -20,8 +20,6 @@ export default function Map() {
 
   const dispatch = useDispatch();
 
-  useEffect(() => {}, [destinations]);
-
   return (
     <View className="flex-1">
       <MapView
